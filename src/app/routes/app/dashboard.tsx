@@ -1,31 +1,32 @@
 import { ContentLayout } from '@/components/layouts';
 import { Table } from '@/components/ui/table';
+import { MyTeamTable } from '@/components/ui/table/my-team';
 import { Tabs } from '@/components/ui/tabs';
+import { useTeams } from '@/features/teams/api/get-teams';
 import { useUser } from '@/lib/auth';
+import { User } from '@/types/api';
 import { DollarSign, Search, Users } from 'lucide-react';
 
 const DashboardRoute = () => {
-  const user = useUser();
-
   const tabItems = [
     {
       value: 'my-team',
       label: 'My Team',
       icon: <Users className="h-4 w-4" />,
-      content: <Table title="My Team" columns={['hani', 'hani']} rows={[]} />,
+      content: <MyTeamTable />,
     },
-    {
-      value: 'transfer-market',
-      label: 'Transfer Market',
-      icon: <DollarSign className="h-4 w-4" />,
-      content: <Table title="Transfer Market" columns={[]} rows={[]} />,
-    },
-    {
-      value: 'my-transfer-list',
-      label: 'My Transfer List',
-      icon: <Search className="h-4 w-4" />,
-      content: <Table title="My Transfer List" columns={[]} rows={[]} />,
-    },
+    // {
+    //   value: 'transfer-market',
+    //   label: 'Transfer Market',
+    //   icon: <DollarSign className="h-4 w-4" />,
+    //   content: <Table title="Transfer Market" columns={[]} rows={[]} />,
+    // },
+    // {
+    //   value: 'my-transfer-list',
+    //   label: 'My Transfer List',
+    //   icon: <Search className="h-4 w-4" />,
+    //   content: <Table title="My Transfer List" columns={[]} rows={[]} />,
+    // },
   ];
 
   return (
@@ -38,7 +39,7 @@ const DashboardRoute = () => {
         </div>
       </div>
 
-      <Tabs tabs={tabItems} defaultValue="account" />
+      <Tabs tabs={tabItems} defaultValue="my-team" />
     </ContentLayout>
   );
 };

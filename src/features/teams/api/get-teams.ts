@@ -5,7 +5,7 @@ import { QueryConfig } from '@/lib/react-query';
 // import { Team } from '@/types/api';
 
 export const getTeams = (): Promise<{ data: any[] }> => {
-  return api.get('/teams');
+  return api.get('/players');
 };
 
 export const getTeamsQueryOptions = () => {
@@ -16,10 +16,14 @@ export const getTeamsQueryOptions = () => {
 };
 
 type UseTeamsOptions = {
+  enabled?: boolean;
   queryConfig?: QueryConfig<typeof getTeamsQueryOptions>;
 };
 
-export const useTeams = ({ queryConfig = {} }: UseTeamsOptions = {}) => {
+export const useTeams = ({
+  // enabled = false,
+  queryConfig = {},
+}: UseTeamsOptions = {}) => {
   return useQuery({
     ...getTeamsQueryOptions(),
     ...queryConfig,

@@ -1,6 +1,5 @@
 export const LoadingSkelton = () => {
   const skeletonRows = Array(4).fill(0);
-
   return (
     <tbody>
       {skeletonRows.map((_, index) => (
@@ -15,33 +14,33 @@ export const LoadingSkelton = () => {
             </div>
           </td>
 
-          <td className="px-6 py-4">
+          <td className="max-md:hidden px-6 py-4">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
               <div className="h-6 bg-gray-300 rounded-full w-12"></div>
             </div>
           </td>
 
-          <td className="px-6 py-4">
+          <td className="max-md:hidden px-6 py-4">
             <div className="flex items-center gap-2">
               <div className="w-6 h-4 bg-gray-300 rounded"></div>
               <div className="h-4 bg-gray-300 rounded w-20"></div>
             </div>
           </td>
 
-          <td className="px-6 py-4">
+          <td className="max-md:hidden px-6 py-4">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-gray-300 rounded"></div>
               <div className="h-6 bg-gray-300 rounded w-8"></div>
             </div>
           </td>
 
-          <td className="px-6 py-4">
+          <td className="max-md:hidden px-6 py-4">
             <div className="h-6 bg-gray-300 rounded w-16 mb-1"></div>
             <div className="h-3 bg-gray-300 rounded w-12"></div>
           </td>
 
-          <td className="px-6 py-4">
+          <td className="max-md:hidden px-6 py-4">
             <div className="h-6 bg-gray-300 rounded-full w-16"></div>
           </td>
 

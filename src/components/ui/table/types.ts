@@ -41,7 +41,7 @@ export interface Team {
   updatedAt: Date;
 }
 
-interface Player {
+export interface Player {
   id: string;
   name: string;
   position: PositionType;
