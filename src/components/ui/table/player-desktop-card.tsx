@@ -6,12 +6,36 @@ import {
   getPositionBadgeColor,
   getRatingColor,
 } from './badgeColor';
-import { ArrowUpRight, Star } from 'lucide-react';
+import { ArrowUpRight, DollarSign, Star } from 'lucide-react';
+import { useTransfer, useUnTransfer } from '@/features/teams/api/get-players';
 
 type Props = {
   player: Omit<Player, 'createdAt' | 'updatedAt'>;
 };
 export const PlayerDesktopCard = ({ player }: Props) => {
+  const [askingPrice, setAskingPrice] = useState({
+    open: false,
+    value: 0,
+  });
+
+  const transferPlayer = useTransfer({
+    onSuccess: () => {
+      setAskingPrice({
+        open: false,
+        value: 0,
+      });
+    },
+  });
+
+  const unTransferPlayer = useUnTransfer({
+    onSuccess: () => {
+      setAskingPrice({
+        open: false,
+        value: 0,
+      });
+    },
+  });
+
   return (
     <tr
       key={player.id}
@@ -85,15 +109,55 @@ export const PlayerDesktopCard = ({ player }: Props) => {
       </td>
       <td className="px-6 py-4 text-center">
         <button
+          onClick={() => {
+            if (!player.isListed) {
+              if (askingPrice.open && askingPrice.value > 0) {
+                transferPlayer.mutate({
+                  playerId: player.id,
+                  askingPrice: askingPrice.value,
+                });
+              } else {
+                setAskingPrice((prev) => ({ ...prev, open: true }));
+              }
+            } else {
+              unTransferPlayer.mutate({
+                playerId: player.id,
+              });
+            }
+          }}
           className={`inline-flex items-center gap-2 px-4 py-2 font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 group-hover:scale-105 ${
             player.isListed
-              ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white'
+              ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white'
               : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
           }`}
         >
-          <span>{player.isListed ? 'Buy' : 'Transfer'}</span>
+          <span>{player.isListed ? 'Remove' : 'Transfer'}</span>
           <ArrowUpRight className="w-4 h-4" />
         </button>
+        {askingPrice.open && (
+          <div className="relative w-full mt-4">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <DollarSign className="w-4 h-4 text-gray-400" />
+            </div>
+            <input
+              type="number"
+              value={askingPrice.value}
+              onChange={(e) =>
+                setAskingPrice((prev) => ({
+                  ...prev,
+                  value: Number(e.target.value),
+                }))
+              }
+              placeholder={`${player.value}`}
+              className="w-full pl-10 pr-4 py-2 font-medium rounded-lg shadow-md border border-gray-300 
+                   bg-gradient-to-r from-gray-50 to-gray-100 
+                   focus:from-blue-50 focus:to-blue-100 
+                   focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200
+                   transition-all duration-200 
+                   placeholder-gray-400 text-gray-700"
+            />
+          </div>
+        )}
       </td>
     </tr>
   );

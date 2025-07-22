@@ -5,10 +5,16 @@ import { env } from '@/config/env';
 import Cookies from 'js-cookie';
 
 function validateTokenInterceptor(config: InternalAxiosRequestConfig) {
-  const token = Cookies.get('refreshToken');
+  const token =
+    config.url === '/auth/me'
+      ? Cookies.get('refreshToken')
+      : Cookies.get('accessToken');
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  config.headers.Accept = 'application/json';
+  config.withCredentials = true;
   return config;
 }
 

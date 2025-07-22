@@ -3,16 +3,35 @@ import { PlayerMobileCard } from './player-mobile-card';
 import { Player } from './types';
 import { PlayerDesktopCard } from './player-desktop-card';
 import { LoadingSkelton } from './loading-skelton';
+import { EmptyFilters, Filters, PlayerFilters } from './players-filters';
+import { SetStateAction, useState } from 'react';
 import { useTeams } from '@/features/teams/api/get-teams';
+import { useUser } from '@/lib/auth';
 
 type Props = {
   title: string;
   columns: string[];
-  players: Player[] | [];
+  players?: Player[];
   isLoading: boolean;
+  submitFilters: (filters: Filters) => void;
 };
 
-export const Table = ({ title, columns, players, isLoading }: Props) => {
+export const Table = ({
+  title,
+  columns,
+  players,
+  isLoading,
+  submitFilters,
+}: Props) => {
+  // console.log(filters);
+
+  // const { data: userData } = useUser();
+
+  // console.log(userData);
+  // useTeams({
+  //   filters: { ...filters, teamId: userData.teamId },
+  // });
+
   return (
     <div className="w-full mx-auto p-3 sm:p-6">
       <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -21,6 +40,7 @@ export const Table = ({ title, columns, players, isLoading }: Props) => {
             <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
             {title}
           </h2>
+          {/* <PlayerFilters submitFilters={submitFilters} /> */}
         </div>
 
         <div className="block lg:hidden">
@@ -29,7 +49,7 @@ export const Table = ({ title, columns, players, isLoading }: Props) => {
           ) : isLoading ? (
             <LoadingSkelton />
           ) : (
-            players.map((player) => (
+            players?.map((player) => (
               <PlayerMobileCard key={player.id} player={player} />
             ))
           )}

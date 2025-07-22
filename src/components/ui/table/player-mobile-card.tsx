@@ -2,13 +2,18 @@ import { useState } from 'react';
 import { Player } from './types';
 import { getPositionIcon } from './getPositionIcon';
 import { formatValue, getRatingColor } from './badgeColor';
-import { ArrowUpRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
+import { useTransfer } from '@/features/teams/api/get-players';
 
 type Props = {
   player: Omit<Player, 'createdAt' | 'updatedAt'>;
 };
 export const PlayerMobileCard = ({ player }: Props) => {
   const [expandedRows, setExpandedRows] = useState(new Set());
+  const [askingPrice, setAskingPrice] = useState({
+    open: false,
+    value: 0,
+  });
 
   const toggleRow = (playerId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -19,6 +24,15 @@ export const PlayerMobileCard = ({ player }: Props) => {
     }
     setExpandedRows(newExpanded);
   };
+
+  const transferPlayer = useTransfer({
+    onSuccess: () => {
+      setAskingPrice({
+        open: false,
+        value: 0,
+      });
+    },
+  });
 
   return (
     <div
@@ -109,6 +123,16 @@ export const PlayerMobileCard = ({ player }: Props) => {
             )}
           </div>
           <button
+            onClick={() => {
+              if (askingPrice.open && askingPrice.value > 0) {
+                transferPlayer.mutate({
+                  playerId: player.id,
+                  askingPrice: askingPrice.value,
+                });
+              } else {
+                setAskingPrice((prev) => ({ ...prev, open: true }));
+              }
+            }}
             className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-lg shadow-md transition-all duration-200 ${
               player.isListed
                 ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white'
@@ -118,6 +142,30 @@ export const PlayerMobileCard = ({ player }: Props) => {
             <span>{player.isListed ? 'Buy Player' : 'Transfer'}</span>
             <ArrowUpRight className="w-4 h-4" />
           </button>
+          {askingPrice.open && (
+            <div className="relative w-full mt-4">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <DollarSign className="w-4 h-4 text-gray-400" />
+              </div>
+              <input
+                type="number"
+                value={askingPrice.value}
+                onChange={(e) =>
+                  setAskingPrice((prev) => ({
+                    ...prev,
+                    value: Number(e.target.value),
+                  }))
+                }
+                placeholder={`${player.value}`}
+                className="w-full pl-10 pr-4 py-2 font-medium rounded-lg shadow-md border border-gray-300 
+                   bg-gradient-to-r from-gray-50 to-gray-100 
+                   focus:from-blue-50 focus:to-blue-100 
+                   focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200
+                   transition-all duration-200 
+                   placeholder-gray-400 text-gray-700"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
