@@ -2,9 +2,9 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
 import { QueryConfig } from '@/lib/react-query';
-import { Team } from '@/types/api';
+// import { Team } from '@/types/api';
 
-export const getTeams = (): Promise<{ data: Team[] }> => {
+export const getTeams = (): Promise<{ data: any[] }> => {
   return api.get('/teams');
 };
 

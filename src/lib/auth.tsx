@@ -6,13 +6,39 @@ import { paths } from '@/config/paths';
 import { AuthResponse, User } from '@/types/api';
 
 import { api } from './api-client';
+import Cookies from 'js-cookie';
+import { storeCredentials } from './storeCredentials';
 
 const getUser = async () => {
-  return null;
-};
+  const token = Cookies.get('accessToken');
 
+  if (!token) {
+    return {};
+  }
+  const response = await api.post('/auth/me', {
+    refreshToken: token,
+  });
+
+  const { message }: any = response;
+
+  if (message === 'Token Not Found') {
+    const { user, tokens }: AuthResponse = await api.post(
+      '/auth/refresh-tokens',
+      {
+        refreshToken: Cookies.get('refreshToken'),
+      },
+    );
+    storeCredentials(user, tokens);
+
+    return user;
+  } else {
+    return response.user;
+  }
+};
 const logout = (): Promise<void> => {
-  return api.post('/auth/logout');
+  return api.post('/auth/logout', {
+    refreshToken: Cookies.get('refreshToken'),
+  });
 };
 
 export const loginInputSchema = z.object({
@@ -25,26 +51,11 @@ const loginWithEmailAndPassword = (data: LoginInput): Promise<AuthResponse> => {
   return api.post('/auth/login', data);
 };
 
-export const registerInputSchema = z
-  .object({
-    email: z.string().min(1, 'Required'),
-    name: z.string().min(1, 'Required'),
-    // lastName: z.string().min(1, 'Required'),
-    password: z.string().min(5, 'Required'),
-  })
-  .and(
-    z
-      .object({
-        teamId: z.string().min(1, 'Required'),
-        teamName: z.null().default(null),
-      })
-      .or(
-        z.object({
-          teamName: z.string().min(1, 'Required'),
-          teamId: z.null().default(null),
-        }),
-      ),
-  );
+export const registerInputSchema = z.object({
+  name: z.string().min(1, 'Required'),
+  email: z.string().min(1, 'Required'),
+  password: z.string().min(5, 'Required'),
+});
 
 export type RegisterInput = z.infer<typeof registerInputSchema>;
 
@@ -56,26 +67,32 @@ const registerWithEmailAndPassword = (
 
 const authConfig = {
   userFn: getUser,
+
   loginFn: async (data: LoginInput) => {
-    const response = await loginWithEmailAndPassword(data);
-    return response.user;
+    const { user, tokens } = await loginWithEmailAndPassword(data);
+    storeCredentials(user, tokens);
+    return user;
   },
   registerFn: async (data: RegisterInput) => {
-    const response = await registerWithEmailAndPassword(data);
-    return response.user;
+    const { user, tokens } = await registerWithEmailAndPassword(data);
+    storeCredentials(user, tokens);
+    return user;
   },
-  logoutFn: logout,
+  logoutFn: async () => {
+    await logout();
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+  },
 };
 
 export const { useUser, useLogin, useLogout, useRegister, AuthLoader } =
   configureAuth(authConfig);
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const user = useUser();
+  const { data } = useUser();
   const location = useLocation();
 
-  if (!user.data) {
-    // todo Change this to get user
+  if (!data) {
     return (
       <Navigate to={paths.auth.login.getHref(location.pathname)} replace />
     );

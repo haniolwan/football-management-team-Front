@@ -23,6 +23,10 @@ const convert = (queryClient: QueryClient) => (m: any) => {
 
 export const createAppRouter = (queryClient: QueryClient) =>
   createBrowserRouter([
+    // {
+    //   path: paths.home.path,
+    //   lazy: () => import('./routes/landing').then(convert(queryClient)),
+    // },
     {
       path: paths.auth.register.path,
       lazy: () => import('./routes/auth/register').then(convert(queryClient)),
@@ -41,7 +45,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
       ErrorBoundary: AppRootErrorBoundary,
       children: [
         {
-          path: paths.app.dashboard.path,
+          path: paths.app.root.path,
           lazy: () =>
             import('./routes/app/dashboard').then(convert(queryClient)),
         },

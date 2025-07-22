@@ -1,7 +1,8 @@
 import { ContentLayout } from '@/components/layouts';
+import { Table } from '@/components/ui/table';
 import { Tabs } from '@/components/ui/tabs';
 import { useUser } from '@/lib/auth';
-import { DollarSign, EditIcon, Lock, Search, User, Users } from 'lucide-react';
+import { DollarSign, Search, Users } from 'lucide-react';
 
 const DashboardRoute = () => {
   const user = useUser();
@@ -11,21 +12,22 @@ const DashboardRoute = () => {
       value: 'my-team',
       label: 'My Team',
       icon: <Users className="h-4 w-4" />,
-      content: <p>My Team Content</p>,
+      content: <Table title="My Team" columns={['hani', 'hani']} rows={[]} />,
     },
     {
       value: 'transfer-market',
       label: 'Transfer Market',
       icon: <DollarSign className="h-4 w-4" />,
-      content: <p>Transfer Market Content</p>,
+      content: <Table title="Transfer Market" columns={[]} rows={[]} />,
     },
     {
       value: 'my-transfer-list',
       label: 'My Transfer List',
       icon: <Search className="h-4 w-4" />,
-      content: <p>Transfer List</p>,
+      content: <Table title="My Transfer List" columns={[]} rows={[]} />,
     },
   ];
+
   return (
     <ContentLayout title="Dashboard">
       <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg mb-5">

@@ -11,19 +11,22 @@ type LayoutProps = {
 };
 
 export const AuthLayout = ({ children, title }: LayoutProps) => {
-  const user = useUser();
+  const {
+    data: { user },
+  } = useUser();
+
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo');
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user.data) {
+    if (user) {
       navigate(redirectTo ? redirectTo : paths.app.dashboard.getHref(), {
         replace: true,
       });
     }
-  }, [user.data, navigate, redirectTo]);
+  }, [user, navigate, redirectTo]);
 
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-100 py-12 sm:px-6 lg:px-8">
