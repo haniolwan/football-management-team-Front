@@ -52,7 +52,7 @@ export interface Player {
   isListed: boolean;
   askingPrice?: number;
   team?: Team;
-  teamId?: number;
+  teamId: number;
   createdAt: Date;
   updatedAt: Date;
 }

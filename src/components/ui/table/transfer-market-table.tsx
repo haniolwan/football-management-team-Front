@@ -2,6 +2,7 @@ import { Table } from './table';
 import { useState } from 'react';
 import { EmptyFilters, Filters } from './players-filters';
 import { Player } from './types';
+import { useMarketPlayers } from '@/features/teams/api/get-market-players';
 
 const tableCols = [
   'Player',
@@ -13,26 +14,21 @@ const tableCols = [
   'Action',
 ];
 
-export const MyTeamTable = ({
-  players,
-  isLoading,
-}: {
-  players?: Player[];
-  isLoading: boolean;
-}) => {
+export const TransferMarketTable = () => {
   const [filters, setFilters] = useState<Filters>(EmptyFilters);
 
   const submitFilters = (newFilters: Filters) => {
     setFilters(newFilters);
   };
+  const { data } = useMarketPlayers({ filters: filters });
 
   return (
     <Table
-      pageId="my-team"
-      title="My Team"
+      pageId="transfer-market"
+      title="Transfer Market"
       columns={tableCols}
-      players={players}
-      isLoading={isLoading}
+      players={data}
+      isLoading={false}
       submitFilters={submitFilters}
     />
   );

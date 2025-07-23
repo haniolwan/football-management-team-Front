@@ -3,35 +3,17 @@ import { PlayerMobileCard } from './player-mobile-card';
 import { Player } from './types';
 import { PlayerDesktopCard } from './player-desktop-card';
 import { LoadingSkelton } from './loading-skelton';
-import { EmptyFilters, Filters, PlayerFilters } from './players-filters';
-import { SetStateAction, useState } from 'react';
-import { useTeams } from '@/features/teams/api/get-teams';
-import { useUser } from '@/lib/auth';
+import { PlayerFilters } from './players-filters';
 
 type Props = {
+  pageId: string;
   title: string;
   columns: string[];
   players?: Player[];
   isLoading: boolean;
-  submitFilters: (filters: Filters) => void;
 };
 
-export const Table = ({
-  title,
-  columns,
-  players,
-  isLoading,
-  submitFilters,
-}: Props) => {
-  // console.log(filters);
-
-  // const { data: userData } = useUser();
-
-  // console.log(userData);
-  // useTeams({
-  //   filters: { ...filters, teamId: userData.teamId },
-  // });
-
+export const Table = ({ pageId, title, players, isLoading }: Props) => {
   return (
     <div className="w-full mx-auto p-3 sm:p-6">
       <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -40,17 +22,28 @@ export const Table = ({
             <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
             {title}
           </h2>
-          {/* <PlayerFilters submitFilters={submitFilters} /> */}
         </div>
+        <PlayerFilters submitFilters={() => {}} />
 
         <div className="block lg:hidden">
           {!players && !isLoading ? (
-            <>show empty state</>
+            <tr className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+              <td
+                colSpan={7}
+                className="p-4 text-center py-6 text-gray-500 dark:text-gray-400"
+              >
+                No players found.
+              </td>
+            </tr>
           ) : isLoading ? (
             <LoadingSkelton />
           ) : (
             players?.map((player) => (
-              <PlayerMobileCard key={player.id} player={player} />
+              <PlayerMobileCard
+                pageId={pageId}
+                key={player.id}
+                player={player}
+              />
             ))
           )}
         </div>
@@ -101,7 +94,7 @@ export const Table = ({
                 <tr className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
                   <td
                     colSpan={7}
-                    className="text-center py-6 text-gray-500 dark:text-gray-400"
+                    className="p-4 text-center py-6 text-gray-500 dark:text-gray-400"
                   >
                     No players found.
                   </td>
@@ -110,7 +103,11 @@ export const Table = ({
                 <LoadingSkelton />
               ) : (
                 players.map((player) => (
-                  <PlayerDesktopCard key={player.id} player={player} />
+                  <PlayerDesktopCard
+                    pageId={pageId}
+                    key={player.id}
+                    player={player}
+                  />
                 ))
               )}
             </tbody>

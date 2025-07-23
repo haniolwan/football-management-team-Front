@@ -29,7 +29,7 @@ export function Tabs({ tabs, defaultValue, className }: TabsProps) {
       className={cn('w-full', className)}
       onValueChange={(val) => setSelectedTab(val)}
     >
-      <TabsPrimitive.List className="flex space-x-2 border-b mb-4">
+      <TabsPrimitive.List className="flex max-md:justify-center space-x-2 border-b my-4">
         {tabs.map((tab) => (
           <TabsPrimitive.Trigger asChild key={tab.value} value={tab.value}>
             <Button

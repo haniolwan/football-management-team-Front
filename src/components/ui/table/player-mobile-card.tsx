@@ -1,14 +1,24 @@
 import { useState } from 'react';
 import { Player } from './types';
 import { getPositionIcon } from './getPositionIcon';
-import { formatValue, getRatingColor } from './badgeColor';
-import { ArrowUpRight, ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
-import { useTransfer } from '@/features/teams/api/get-players';
+import { formatValue, getRatingColor } from './badge-color';
+import {
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp,
+  DollarSign,
+  TrashIcon,
+} from 'lucide-react';
+import { useTransfer, useUnTransfer } from '@/features/teams/api/get-players';
+import { ConfirmButton } from './confirm-button';
+import { useUser } from '@/lib/auth';
+import { useBuyPlayer } from '@/features/teams/api/buy-market-players';
 
 type Props = {
+  pageId: string;
   player: Omit<Player, 'createdAt' | 'updatedAt'>;
 };
-export const PlayerMobileCard = ({ player }: Props) => {
+export const PlayerMobileCard = ({ pageId, player }: Props) => {
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [askingPrice, setAskingPrice] = useState({
     open: false,
@@ -33,6 +43,26 @@ export const PlayerMobileCard = ({ player }: Props) => {
       });
     },
   });
+
+  const unTransferPlayer = useUnTransfer({
+    onSuccess: () => {
+      setAskingPrice({
+        open: false,
+        value: 0,
+      });
+    },
+  });
+
+  const buyPlayer = useBuyPlayer({
+    onSuccess: () => {
+      setAskingPrice({
+        open: false,
+        value: 0,
+      });
+    },
+  });
+
+  const { data: userData } = useUser();
 
   return (
     <div
@@ -80,7 +110,7 @@ export const PlayerMobileCard = ({ player }: Props) => {
 
       {expandedRows.has(player.id) && (
         <div className="px-4 pb-4 bg-gray-50 dark:bg-gray-800">
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-2 gap-4 mb-4 max-lg:p-4">
             <div>
               <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">
                 Age & Team
@@ -122,26 +152,71 @@ export const PlayerMobileCard = ({ player }: Props) => {
               </div>
             )}
           </div>
-          <button
-            onClick={() => {
-              if (askingPrice.open && askingPrice.value > 0) {
-                transferPlayer.mutate({
-                  playerId: player.id,
-                  askingPrice: askingPrice.value,
-                });
+
+          {(() => {
+            const isMyPlayer = userData.teamId === player.teamId;
+
+            if (pageId === 'transfer-market') {
+              if (!isMyPlayer) {
+                return (
+                  <ConfirmButton
+                    label="Buy Player"
+                    onClick={() =>
+                      buyPlayer.mutate({
+                        playerId: player.id,
+                        teamId: player.teamId,
+                      })
+                    }
+                    variant="success"
+                  />
+                );
               } else {
-                setAskingPrice((prev) => ({ ...prev, open: true }));
+                return (
+                  <ConfirmButton
+                    label="Remove"
+                    onClick={() =>
+                      unTransferPlayer.mutate({
+                        playerId: player.id,
+                      })
+                    }
+                    variant="danger"
+                  />
+                );
               }
-            }}
-            className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-lg shadow-md transition-all duration-200 ${
-              player.isListed
-                ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white'
-                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
-            }`}
-          >
-            <span>{player.isListed ? 'Buy Player' : 'Transfer'}</span>
-            <ArrowUpRight className="w-4 h-4" />
-          </button>
+            }
+
+            if (pageId === 'my-transfer-list') {
+              return (
+                <ConfirmButton
+                  label="Remove"
+                  onClick={() =>
+                    unTransferPlayer.mutate({
+                      playerId: player.id,
+                    })
+                  }
+                  variant="danger"
+                />
+              );
+            }
+
+            // Default for user’s own team (not transfer list or market)
+            if (isMyPlayer) {
+              return (
+                <ConfirmButton
+                  label="Transfer"
+                  onClick={() =>
+                    transferPlayer.mutate({
+                      playerId: player.id,
+                      askingPrice: askingPrice.value,
+                    })
+                  }
+                  variant="primary"
+                />
+              );
+            }
+
+            return null;
+          })()}
           {askingPrice.open && (
             <div className="relative w-full mt-4">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

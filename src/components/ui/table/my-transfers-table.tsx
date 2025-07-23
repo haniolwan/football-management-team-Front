@@ -13,27 +13,21 @@ const tableCols = [
   'Action',
 ];
 
-export const MyTeamTable = ({
+export const MyTransfersTable = ({
   players,
   isLoading,
 }: {
   players?: Player[];
   isLoading: boolean;
 }) => {
-  const [filters, setFilters] = useState<Filters>(EmptyFilters);
-
-  const submitFilters = (newFilters: Filters) => {
-    setFilters(newFilters);
-  };
-
+  const listedPlayers = players?.filter((pl) => pl.isListed);
   return (
     <Table
-      pageId="my-team"
-      title="My Team"
+      pageId="my-transfer-list"
+      title="My Transfers list"
       columns={tableCols}
-      players={players}
+      players={listedPlayers}
       isLoading={isLoading}
-      submitFilters={submitFilters}
     />
   );
 };

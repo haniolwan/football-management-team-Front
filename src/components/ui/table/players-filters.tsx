@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import { Form, Input, Select } from '../form';
+import { Button } from '../button';
+import { z } from 'zod';
+import { useMarketPlayersMutation } from '@/features/teams/api/get-market-players';
 
 export type Filters = {
   name: string;
@@ -23,68 +26,61 @@ type Props = {
 };
 
 export const PlayerFilters = ({ submitFilters }: Props) => {
-  const [filters, setFilters] = useState(EmptyFilters);
+  const filterSchema = z.object({
+    name: z.string(),
+    team_name: z.string(),
+    sortType: z.string(),
+    sortBy: z.string(),
+  });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    setFilters((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const sortTypeOptions = [
+    { label: 'Type', value: '' },
+    { label: 'asc', value: 'asc' },
+    { label: 'desc', value: 'desc' },
+  ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    submitFilters(filters);
-  };
+  const sortByOptions = [
+    { label: 'Column', value: '' },
+    { label: 'name', value: 'name' },
+    { label: 'Team', value: 'team_name' },
+    { label: 'Asking price', value: 'askingPrice' },
+  ];
+  const players = useMarketPlayersMutation();
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-4 max-w-md mt-3">
-      <input
-        type="text"
-        name="name"
-        value={filters.name}
-        onChange={handleChange}
-        placeholder="Player Name"
-        className="border p-2 rounded"
-      />
+    <Form
+      className="flex items-center p-3"
+      onSubmit={(values) => {
+        console.log(values);
+        players.mutate(values);
+      }}
+      schema={filterSchema}
+    >
+      {({ register }) => (
+        <div className="flex gap-4">
+          <Input
+            type="text"
+            placeholder="Name"
+            registration={register('name')}
+          />
+          <Input
+            type="text"
+            placeholder="Team Name"
+            registration={register('team_name')}
+          />
+          <Select
+            options={sortTypeOptions}
+            registration={register('sortType')}
+          />
 
-      {/* <select
-        name="team_name"
-        value={filters.team_name}
-        onChange={handleChange}
-        className="border p-2 rounded"
-      >
-        <option value="">Select Team</option>
-        <option value="Barcelona">Barcelona</option>
-        <option value="Real Madrid">Real Madrid</option>
-        <option value="Liverpool">Liverpool</option>
-      </select>
-
-      <select
-        name="sortType"
-        value={filters.sortType}
-        onChange={(e) => {
-          setFilters((prev) => ({
-            ...prev,
-            sortBy: 'askingPrice',
-            sortType: e.target.value,
-          }));
-        }}
-        className="border p-2 rounded"
-      >
-        <option value="">Sort by Asking Price</option>
-        <option value="asc">Lowest to Highest</option>
-        <option value="desc">Highest to Lowest</option>
-      </select> */}
-
-      <button
-        type="submit"
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Filter
-      </button>
-    </form>
+          <Select options={sortByOptions} registration={register('sortBy')} />
+          <div>
+            <Button className="mt-1" isLoading={false} type="submit">
+              Apply
+            </Button>
+          </div>
+        </div>
+      )}
+    </Form>
   );
 };

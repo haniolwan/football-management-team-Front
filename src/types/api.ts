@@ -39,5 +39,7 @@ export type AuthResponse = {
   };
 };
 export type Team = Entity<{
+  id: string;
   name: string;
+  budget: number;
 }>;

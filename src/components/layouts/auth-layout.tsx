@@ -11,9 +11,7 @@ type LayoutProps = {
 };
 
 export const AuthLayout = ({ children, title }: LayoutProps) => {
-  const {
-    data: { user },
-  } = useUser();
+  const { data } = useUser();
 
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo');
@@ -21,12 +19,12 @@ export const AuthLayout = ({ children, title }: LayoutProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (data?.user) {
       navigate(redirectTo ? redirectTo : paths.app.dashboard.getHref(), {
         replace: true,
       });
     }
-  }, [user, navigate, redirectTo]);
+  }, [data?.user, navigate, redirectTo]);
 
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-100 py-12 sm:px-6 lg:px-8">

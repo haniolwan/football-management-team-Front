@@ -55,7 +55,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-col sm:gap-4 sm:py-4">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:justify-end sm:border-0 sm:bg-transparent sm:px-6">
           <Progress />
-          <div onClick={() => logout.mutate({})}>Logout</div>
+          <div className="font-bold" onClick={() => logout.mutate({})}>
+            Logout
+          </div>
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           {children}

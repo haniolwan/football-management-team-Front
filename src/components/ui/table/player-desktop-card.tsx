@@ -5,14 +5,18 @@ import {
   formatValue,
   getPositionBadgeColor,
   getRatingColor,
-} from './badgeColor';
-import { ArrowUpRight, DollarSign, Star } from 'lucide-react';
+} from './badge-color';
+import { DollarSign, Star } from 'lucide-react';
 import { useTransfer, useUnTransfer } from '@/features/teams/api/get-players';
+import { ConfirmButton } from './confirm-button';
+import { useUser } from '@/lib/auth';
+import { useBuyPlayer } from '@/features/teams/api/buy-market-players';
 
 type Props = {
+  pageId: string;
   player: Omit<Player, 'createdAt' | 'updatedAt'>;
 };
-export const PlayerDesktopCard = ({ player }: Props) => {
+export const PlayerDesktopCard = ({ pageId, player }: Props) => {
   const [askingPrice, setAskingPrice] = useState({
     open: false,
     value: 0,
@@ -35,6 +39,17 @@ export const PlayerDesktopCard = ({ player }: Props) => {
       });
     },
   });
+
+  const buyPlayer = useBuyPlayer({
+    onSuccess: () => {
+      setAskingPrice({
+        open: false,
+        value: 0,
+      });
+    },
+  });
+
+  const { data: userData } = useUser();
 
   return (
     <tr
@@ -108,10 +123,34 @@ export const PlayerDesktopCard = ({ player }: Props) => {
         </span>
       </td>
       <td className="px-6 py-4 text-center">
-        <button
-          onClick={() => {
-            if (!player.isListed) {
-              if (askingPrice.open && askingPrice.value > 0) {
+        {pageId === 'transfer-market' ? (
+          userData.teamId !== player.teamId ? (
+            <ConfirmButton
+              label="Buy Player"
+              onClick={() =>
+                buyPlayer.mutate({
+                  playerId: player.id,
+                  teamId: userData.teamId,
+                })
+              }
+              variant="success"
+            />
+          ) : (
+            <ConfirmButton
+              label="Remove"
+              onClick={() =>
+                unTransferPlayer.mutate({
+                  playerId: player.id,
+                })
+              }
+              variant="danger"
+            />
+          )
+        ) : (
+          <ConfirmButton
+            label="Transfer"
+            onClick={() => {
+              if (askingPrice.open) {
                 transferPlayer.mutate({
                   playerId: player.id,
                   askingPrice: askingPrice.value,
@@ -119,21 +158,10 @@ export const PlayerDesktopCard = ({ player }: Props) => {
               } else {
                 setAskingPrice((prev) => ({ ...prev, open: true }));
               }
-            } else {
-              unTransferPlayer.mutate({
-                playerId: player.id,
-              });
-            }
-          }}
-          className={`inline-flex items-center gap-2 px-4 py-2 font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 group-hover:scale-105 ${
-            player.isListed
-              ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white'
-              : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
-          }`}
-        >
-          <span>{player.isListed ? 'Remove' : 'Transfer'}</span>
-          <ArrowUpRight className="w-4 h-4" />
-        </button>
+            }}
+            variant="primary"
+          />
+        )}
         {askingPrice.open && (
           <div className="relative w-full mt-4">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
